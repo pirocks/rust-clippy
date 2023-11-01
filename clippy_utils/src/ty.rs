@@ -31,7 +31,9 @@ use rustc_trait_selection::traits::{Obligation, ObligationCause};
 use std::assert_matches::debug_assert_matches;
 use std::iter;
 
+use crate::rustc_lint::LintContext;
 use crate::{match_def_path, path_res};
+use rustc_middle::lint::in_external_macro;
 
 mod type_certainty;
 pub use type_certainty::expr_type_is_certain;
@@ -1315,4 +1317,27 @@ pub fn normalize_with_regions<'tcx>(tcx: TyCtxt<'tcx>, param_env: ParamEnv<'tcx>
 /// Checks if the type is `core::mem::ManuallyDrop<_>`
 pub fn is_manually_drop(ty: Ty<'_>) -> bool {
     ty.ty_adt_def().map_or(false, AdtDef::is_manually_drop)
+}
+
+/// The type of the `Err`-variant in a `std::result::Result` returned by the
+/// given `FnDecl`
+pub fn result_err_ty<'tcx>(
+    cx: &LateContext<'tcx>,
+    decl: &hir::FnDecl<'tcx>,
+    id: hir::def_id::LocalDefId,
+    item_span: Span,
+) -> Option<(&'tcx hir::Ty<'tcx>, Ty<'tcx>)> {
+    if !in_external_macro(cx.sess(), item_span)
+        && let hir::FnRetTy::Return(hir_ty) = decl.output
+        && let ty = cx
+            .tcx
+            .instantiate_bound_regions_with_erased(cx.tcx.fn_sig(id).instantiate_identity().output())
+        && is_type_diagnostic_item(cx, ty, sym::Result)
+        && let ty::Adt(_, args) = ty.kind()
+    {
+        let err_ty = args.type_at(1);
+        Some((hir_ty, err_ty))
+    } else {
+        None
+    }
 }

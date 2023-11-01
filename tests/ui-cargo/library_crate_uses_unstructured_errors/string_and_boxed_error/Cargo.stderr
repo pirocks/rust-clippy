@@ -1,0 +1,19 @@
+error: this is an unstructured error type
+ --> src/lib.rs:5:17
+  |
+5 | pub fn foo() -> Result<(), String> {
+  |                 ^^^^^^^^^^^^^^^^^^
+  |
+  = note: try using an error enum
+  = note: `-D clippy::library-crates-structured-errors` implied by `-D warnings`
+  = help: to override `-D warnings` add `#[allow(clippy::library_crates_structured_errors)]`
+
+error: this is an unstructured error type
+ --> src/lib.rs:9:17
+  |
+9 | pub fn bar() -> Result<(), Box<dyn Error>> {
+  |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: try using an error enum
+
+error: could not compile `string_and_boxed_error` (lib) due to 2 previous errors

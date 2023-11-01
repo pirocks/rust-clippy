@@ -8,6 +8,8 @@ license = "MIT OR Apache-2.0"
 keywords = ["clippy", "lint", "plugin"]
 edition = "2021"
 
+
+
 [dependencies]
 arrayvec = { version = "0.7", default-features = false }
 cargo_metadata = "0.15.3"

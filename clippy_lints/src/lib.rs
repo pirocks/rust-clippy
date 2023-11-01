@@ -181,6 +181,7 @@ mod len_zero;
 mod let_if_seq;
 mod let_underscore;
 mod let_with_type_underscore;
+mod library_crates_structured_errors;
 mod lifetimes;
 mod lines_filter_map_ok;
 mod literal_representation;
@@ -1092,6 +1093,8 @@ pub fn register_lints(store: &mut rustc_lint::LintStore, conf: &'static Conf) {
     store.register_late_pass(move |_| {
         Box::new(thread_local_initializer_can_be_made_const::ThreadLocalInitializerCanBeMadeConst::new(msrv()))
     });
+    store
+        .register_late_pass(move |_| Box::<library_crates_structured_errors::LibraryCratesStructuredErrors>::default());
     // add lints here, do not remove this comment, it's used in `new_lint`
 }
 

@@ -1,38 +1,15 @@
 use rustc_errors::Diagnostic;
 use rustc_hir as hir;
-use rustc_lint::{LateContext, LintContext};
-use rustc_middle::lint::in_external_macro;
-use rustc_middle::ty::{self, Adt, Ty};
-use rustc_span::{sym, Span};
+use rustc_lint::LateContext;
+use rustc_middle::ty::{Adt, Ty};
+use rustc_span::Span;
 
 use clippy_utils::diagnostics::{span_lint_and_help, span_lint_and_then};
 use clippy_utils::trait_ref_of_method;
-use clippy_utils::ty::{approx_ty_size, is_type_diagnostic_item, AdtVariantInfo};
+use clippy_utils::ty::{approx_ty_size, AdtVariantInfo};
 
 use super::{RESULT_LARGE_ERR, RESULT_UNIT_ERR};
-
-/// The type of the `Err`-variant in a `std::result::Result` returned by the
-/// given `FnDecl`
-fn result_err_ty<'tcx>(
-    cx: &LateContext<'tcx>,
-    decl: &hir::FnDecl<'tcx>,
-    id: hir::def_id::LocalDefId,
-    item_span: Span,
-) -> Option<(&'tcx hir::Ty<'tcx>, Ty<'tcx>)> {
-    if !in_external_macro(cx.sess(), item_span)
-        && let hir::FnRetTy::Return(hir_ty) = decl.output
-        && let ty = cx
-            .tcx
-            .instantiate_bound_regions_with_erased(cx.tcx.fn_sig(id).instantiate_identity().output())
-        && is_type_diagnostic_item(cx, ty, sym::Result)
-        && let ty::Adt(_, args) = ty.kind()
-    {
-        let err_ty = args.type_at(1);
-        Some((hir_ty, err_ty))
-    } else {
-        None
-    }
-}
+use clippy_utils::ty::result_err_ty;
 
 pub(super) fn check_item<'tcx>(cx: &LateContext<'tcx>, item: &hir::Item<'tcx>, large_err_threshold: u64) {
     if let hir::ItemKind::Fn(ref sig, _generics, _) = item.kind

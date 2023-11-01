@@ -1,0 +1,19 @@
+error: this is an unstructured error type
+ --> src/lib.rs:3:40
+  |
+3 | pub fn uses_anyhow_error_directly() -> Result<(), anyhow::Error> {
+  |                                        ^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: try using an error enum
+  = note: `-D clippy::library-crates-structured-errors` implied by `-D warnings`
+  = help: to override `-D warnings` add `#[allow(clippy::library_crates_structured_errors)]`
+
+error: this is an unstructured error type
+ --> src/lib.rs:7:42
+  |
+7 | pub fn uses_anyhow_error_indirectly() -> anyhow::Result<()> {
+  |                                          ^^^^^^^^^^^^^^^^^^
+  |
+  = note: try using an error enum
+
+error: could not compile `uses_anyhow` (lib) due to 2 previous errors
