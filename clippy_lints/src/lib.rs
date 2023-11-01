@@ -365,6 +365,7 @@ mod wildcard_imports;
 mod write;
 mod zero_div_zero;
 mod zero_sized_map_values;
+mod library_crates_error_enum;
 // end lints modules, do not remove this comment, it’s used in `update_lints`
 
 use clippy_config::{get_configuration_metadata, Conf};

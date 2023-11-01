@@ -11,6 +11,26 @@ edition = "2021"
 
 
 [dependencies]
+#rustc_arena = { path = "/home/francis/CLionProjects/rust/compiler/rustc_arena" }
+#rustc_ast = { path = "/home/francis/CLionProjects/rust/compiler/rustc_ast" }
+#rustc_ast_pretty = { path = "/home/francis/CLionProjects/rust/compiler/rustc_ast_pretty" }
+#rustc_data_structures = { path = "/home/francis/CLionProjects/rust/compiler/rustc_data_structures" }
+#rustc_driver = { path = "/home/francis/CLionProjects/rust/compiler/rustc_driver" }
+#rustc_errors = { path = "/home/francis/CLionProjects/rust/compiler/rustc_errors" }
+#rustc_hir = { path = "/home/francis/CLionProjects/rust/compiler/rustc_hir" }
+#rustc_hir_analysis = { path = "/home/francis/CLionProjects/rust/compiler/rustc_hir_analysis" }
+#rustc_hir_pretty = { path = "/home/francis/CLionProjects/rust/compiler/rustc_hir_pretty" }
+#rustc_hir_typeck = { path = "/home/francis/CLionProjects/rust/compiler/rustc_hir_typeck" }
+#rustc_index = { path = "/home/francis/CLionProjects/rust/compiler/rustc_index" }
+#rustc_infer = { path = "/home/francis/CLionProjects/rust/compiler/rustc_infer" }
+#rustc_lexer = { path = "/home/francis/CLionProjects/rust/compiler/rustc_lexer" }
+#rustc_lint = { path = "/home/francis/CLionProjects/rust/compiler/rustc_lint" }
+#rustc_middle = { path = "/home/francis/CLionProjects/rust/compiler/rustc_middle" }
+#rustc_parse = { path = "/home/francis/CLionProjects/rust/compiler/rustc_parse" }
+#rustc_session = { path = "/home/francis/CLionProjects/rust/compiler/rustc_session" }
+#rustc_span = { path = "/home/francis/CLionProjects/rust/compiler/rustc_span" }
+#rustc_target = { path = "/home/francis/CLionProjects/rust/compiler/rustc_target" }
+#rustc_trait_selection = { path = "/home/francis/CLionProjects/rust/compiler/rustc_trait_selection" }
 arrayvec = { version = "0.7", default-features = false }
 cargo_metadata = "0.15.3"
 clippy_config = { path = "../clippy_config" }

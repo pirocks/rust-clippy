@@ -19,6 +19,12 @@ path = "src/main.rs"
 [[bin]]
 name = "clippy-driver"
 path = "src/driver.rs"
+#
+#[target.'cfg(NOT_A_PLATFORM)'.dependencies]
+#rustc_driver = { path = "/home/francis/CLionProjects/rust/compiler/rustc_driver" }
+#rustc_interface = { path = "/home/francis/CLionProjects/rust/compiler/rustc_interface" }
+#rustc_session = { path = "/home/francis/CLionProjects/rust/compiler/rustc_session" }
+#rustc_span = { path = "/home/francis/CLionProjects/rust/compiler/rustc_span" }
 
 [dependencies]
 clippy_config = { path = "clippy_config" }
