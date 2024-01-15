@@ -1,15 +1,14 @@
+use std::collections::HashSet;
 use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};
+use toml_edit::{value, Array, Document, Item, Table};
 
 // This module takes an absolute path to a rustc repo and alters the dependencies to point towards
 // the respective rustc subcrates instead of using extern crate xyz.
 // This allows IntelliJ to analyze rustc internals and show proper information inside Clippy
 // code. See https://github.com/rust-lang/rust-clippy/issues/5514 for details
-
-const RUSTC_PATH_SECTION: &str = "[target.'cfg(NOT_A_PLATFORM)'.dependencies]";
-const DEPENDENCIES_SECTION: &str = "[dependencies]";
 
 const CLIPPY_PROJECTS: &[ClippyProjectInfo] = &[
     ClippyProjectInfo::new("root", "Cargo.toml", "src/driver.rs"),
@@ -115,49 +114,96 @@ fn read_project_file(file_path: &str) -> Result<String, ()> {
     }
 }
 
-fn inject_deps_into_manifest(
-    rustc_source_dir: &Path,
-    manifest_path: &str,
-    cargo_toml: &str,
-    lib_rs: &str,
-) -> std::io::Result<()> {
-    // do not inject deps if we have already done so
-    if cargo_toml.contains(RUSTC_PATH_SECTION) {
-        eprintln!("warn: dependencies are already setup inside {manifest_path}, skipping file");
-        return Ok(());
-    }
-
-    let extern_crates = lib_rs
+fn extract_rustc_crates(lib_rs: &str) -> HashSet<String> {
+    lib_rs
         .lines()
         // only take dependencies starting with `rustc_`
         .filter(|line| line.starts_with("extern crate rustc_"))
         // we have something like "extern crate foo;", we only care about the "foo"
         // extern crate rustc_middle;
         //              ^^^^^^^^^^^^
-        .map(|s| &s[13..(s.len() - 1)]);
+        .map(|s| s.replace("extern crate", "").replace(';', "").trim().to_string())
+        .collect()
+}
 
-    let new_deps = extern_crates.map(|dep| {
-        // format the dependencies that are going to be put inside the Cargo.toml
-        format!("{dep} = {{ path = \"{}/{dep}\" }}\n", rustc_source_dir.display())
-    });
+fn parse_cargo_toml(cargo_toml: &str) -> Result<Document, ()> {
+    match cargo_toml.parse::<Document>() {
+        Ok(doc) => Ok(doc),
+        Err(err) => {
+            eprintln!("Cannot parse Cargo.toml: {err}");
+            Err(())
+        },
+    }
+}
 
-    // format a new [dependencies]-block with the new deps we need to inject
-    let mut all_deps = String::from("[target.'cfg(NOT_A_PLATFORM)'.dependencies]\n");
-    new_deps.for_each(|dep_line| {
-        all_deps.push_str(&dep_line);
-    });
-    all_deps.push_str("\n[dependencies]\n");
+fn extract_table<'a>(cargo_toml: &'a mut Document, table: &str) -> Result<&'a mut Table, ()> {
+    let Some(Item::Table(deps)) = cargo_toml.get_mut(table) else {
+        eprintln!("No dependencies entry, or malformed dependencies entry in Cargo.toml?");
+        return Err(());
+    };
+    Ok(deps)
+}
 
-    // replace "[dependencies]" with
-    // [dependencies]
-    // dep1 = { path = ... }
-    // dep2 = { path = ... }
-    // etc
-    let new_manifest = cargo_toml.replacen("[dependencies]\n", &all_deps, 1);
+fn inject_deps_into_manifest(
+    rustc_source_dir: &Path,
+    manifest_path: &str,
+    cargo_toml: &str,
+    lib_rs: &str,
+) -> Result<(), ()> {
+    let mut needed_crates = extract_rustc_crates(lib_rs);
+    let mut toml_document = parse_cargo_toml(cargo_toml)?;
+    let deps = extract_table(&mut toml_document, "dependencies")?;
 
-    // println!("{new_manifest}");
-    let mut file = File::create(manifest_path)?;
-    file.write_all(new_manifest.as_bytes())?;
+    let local_deps: HashSet<_> = deps
+        .iter()
+        .map(|(dep_name, _)| dep_name)
+        .filter(|dep_name| CLIPPY_PROJECTS.iter().any(|project| project.name == *dep_name))
+        .map(ToString::to_string)
+        .collect();
+
+    for (dep_name, _dep) in deps.iter() {
+        if needed_crates.remove(&dep_name.to_string()) {
+            eprintln!("warn: dependency {dep_name} is already setup inside {manifest_path}, skipping dependency");
+        }
+    }
+
+    // do not inject deps if we have already done so
+    if needed_crates.is_empty() {
+        eprintln!("warn: dependencies are already setup inside {manifest_path}, skipping file");
+        return Ok(());
+    }
+
+    for needed_crate in needed_crates.clone() {
+        let mut crate_table = Table::new();
+        crate_table.insert(
+            "path",
+            value(rustc_source_dir.join(&needed_crate).to_string_lossy().to_string()),
+        );
+        crate_table.insert("optional", value(true));
+        deps.insert(&needed_crate, Item::Table(crate_table));
+    }
+
+    let features = extract_table(&mut toml_document, "features")?;
+    let features_array = features
+        .entry("intellij")
+        .or_insert(value(Array::new()))
+        .as_array_mut()
+        .unwrap();
+    features_array.extend(needed_crates);
+    features_array.extend(local_deps.into_iter().map(|feature| feature + "/intellij"));
+
+    match File::create(manifest_path) {
+        Ok(mut file) => {
+            if let Err(err) = file.write_all(toml_document.to_string().as_bytes()) {
+                println!("Error opening {manifest_path}: {err}");
+                return Err(());
+            }
+        },
+        Err(err) => {
+            println!("Error opening {manifest_path}: {err}");
+            return Err(());
+        },
+    };
 
     println!("info: successfully setup dependencies inside {manifest_path}");
 
@@ -166,44 +212,46 @@ fn inject_deps_into_manifest(
 
 pub fn remove_rustc_src() {
     for project in CLIPPY_PROJECTS {
-        remove_rustc_src_from_project(project);
+        let Ok(cargo_content) = read_project_file(project.cargo_file) else {
+            return;
+        };
+        let Ok(lib_content) = read_project_file(project.lib_rs_file) else {
+            return;
+        };
+        if remove_rustc_src_from_project(project.cargo_file, cargo_content.as_str(), lib_content.as_str()).is_err() {
+            return;
+        }
     }
 }
 
-fn remove_rustc_src_from_project(project: &ClippyProjectInfo) -> bool {
-    let Ok(mut cargo_content) = read_project_file(project.cargo_file) else {
-        return false;
-    };
-    let Some(section_start) = cargo_content.find(RUSTC_PATH_SECTION) else {
-        println!(
-            "info: dependencies could not be found in `{}` for {}, skipping file",
-            project.cargo_file, project.name
-        );
-        return true;
+fn remove_rustc_src_from_project(manifest_path: &str, cargo_toml: &str, lib_rs: &str) -> Result<(), ()> {
+    let crates_to_remove = extract_rustc_crates(lib_rs);
+    let mut toml_document = parse_cargo_toml(cargo_toml)?;
+    let deps = extract_table(&mut toml_document, "dependencies")?;
+
+    let mut found_deps = false;
+    for crate_to_remove in crates_to_remove {
+        if deps.remove(&crate_to_remove).is_some() {
+            found_deps = true;
+        }
+    }
+    let features = extract_table(&mut toml_document, "features")?;
+    let removed_feature = features.remove_entry("intellij").is_some();
+
+    if !found_deps && !removed_feature {
+        println!("info: dependencies and features could not be found in `{manifest_path}`, skipping file");
+        return Ok(());
     };
 
-    let Some(end_point) = cargo_content.find(DEPENDENCIES_SECTION) else {
-        eprintln!(
-            "error: the end of the rustc dependencies section could not be found in `{}`",
-            project.cargo_file
-        );
-        return false;
-    };
-
-    cargo_content.replace_range(section_start..end_point, "");
-
-    match File::create(project.cargo_file) {
+    match File::create(manifest_path) {
         Ok(mut file) => {
-            file.write_all(cargo_content.as_bytes()).unwrap();
-            println!("info: successfully removed dependencies inside {}", project.cargo_file);
-            true
+            file.write_all(toml_document.to_string().as_bytes()).unwrap();
+            println!("info: successfully removed dependencies inside {manifest_path}");
+            Ok(())
         },
         Err(err) => {
-            eprintln!(
-                "error: unable to open file `{}` to remove rustc dependencies for {} ({err})",
-                project.cargo_file, project.name
-            );
-            false
+            eprintln!("error: unable to open file `{manifest_path}`: ({err})");
+            Err(())
         },
     }
 }

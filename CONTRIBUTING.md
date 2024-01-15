@@ -93,8 +93,8 @@ an AST expression). `match_def_path()` in Clippy's `utils` module can also be us
 
 ## Getting code-completion for rustc internals to work
 
-### IntelliJ Rust
-Unfortunately, [`IntelliJ Rust`][IntelliJ_rust_homepage] does not (yet?) understand how Clippy uses compiler-internals
+### IntelliJ Rust / Rust Rover
+Unfortunately, [`IntelliJ Rust / Rust Rover`][IntelliJ_rust_homepage] does not (yet?) understand how Clippy uses compiler-internals
 using `extern crate` and it also needs to be able to read the source files of the rustc-compiler which are not
 available via a `rustup` component at the time of writing.
 To work around this, you need to have a copy of the [rustc-repo][rustc_repo] available which can be obtained via
@@ -104,7 +104,9 @@ which `IntelliJ Rust` will be able to understand.
 Run `cargo dev setup intellij --repo-path <repo-path>` where `<repo-path>` is a path to the rustc repo
 you just cloned.
 The command will add path-dependencies pointing towards rustc-crates inside the rustc repo to
-Clippy's `Cargo.toml`s and should allow `IntelliJ Rust` to understand most of the types that Clippy uses.
+Clippy's `Cargo.toml`s and should allow `IntelliJ Rust / Rust Rover` to understand most of the types that Clippy uses.
+These path-dependencies are gated behind an "intellij" feature, so clippy will build/test normally on the command line,
+but Intellij/Rust Rover will still index the dependencies.
 Just make sure to remove the dependencies again before finally making a pull request!
 
 [rustc_repo]: https://github.com/rust-lang/rust/

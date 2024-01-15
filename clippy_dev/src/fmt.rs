@@ -47,7 +47,7 @@ pub fn run(check: bool, verbose: bool) {
         // dependency
         if fs::read_to_string(project_root.join("Cargo.toml"))
             .expect("Failed to read clippy Cargo.toml")
-            .contains("[target.'cfg(NOT_A_PLATFORM)'.dependencies]")
+            .contains("intellij")
         {
             return Err(CliError::IntellijSetupActive);
         }
