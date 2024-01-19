@@ -2,7 +2,7 @@ mod impl_trait_in_params;
 mod misnamed_getters;
 mod must_use;
 mod not_unsafe_ptr_arg_deref;
-mod result;
+pub mod result;
 mod too_many_arguments;
 mod too_many_lines;
 
