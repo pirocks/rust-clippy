@@ -253,7 +253,7 @@ pub(crate) static LINTS: &[&crate::LintInfo] = &[
     crate::let_underscore::LET_UNDERSCORE_MUST_USE_INFO,
     crate::let_underscore::LET_UNDERSCORE_UNTYPED_INFO,
     crate::let_with_type_underscore::LET_WITH_TYPE_UNDERSCORE_INFO,
-    crate::library_crates_error_enum::LIBRARY_CRATES_ERROR_ENUM_INFO,
+    crate::library_crates_structured_errors::LIBRARY_CRATES_STRUCTURED_ERRORS_INFO,
     crate::lifetimes::EXTRA_UNUSED_LIFETIMES_INFO,
     crate::lifetimes::NEEDLESS_LIFETIMES_INFO,
     crate::lines_filter_map_ok::LINES_FILTER_MAP_OK_INFO,
