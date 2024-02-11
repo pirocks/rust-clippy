@@ -121,6 +121,7 @@ mod entry;
 mod enum_clike;
 mod equatable_if_let;
 mod error_impl_error;
+mod error_message_case;
 mod escape;
 mod eta_reduction;
 mod excessive_bools;
@@ -1096,6 +1097,7 @@ pub fn register_lints(store: &mut rustc_lint::LintStore, conf: &'static Conf) {
     });
     store
         .register_late_pass(move |_| Box::<library_crates_structured_errors::LibraryCratesStructuredErrors>::default());
+    store.register_late_pass(|_| Box::new(error_message_case::ErrorMessageCase));
     // add lints here, do not remove this comment, it's used in `new_lint`
 }
 

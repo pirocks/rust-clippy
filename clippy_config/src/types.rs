@@ -132,3 +132,10 @@ pub enum PubUnderscoreFieldsBehaviour {
     PublicallyExported,
     AllPubFields,
 }
+
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize, Serialize)]
+pub enum ErrorMessageCaseBehavior {
+    Lower,
+    Upper
+}
