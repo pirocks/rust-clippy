@@ -1,5 +1,5 @@
 use crate::msrvs::Msrv;
-use crate::types::{DisallowedPath, MacroMatcher, MatchLintBehaviour, PubUnderscoreFieldsBehaviour, Rename};
+use crate::types::{DisallowedPath, MacroMatcher, MatchLintBehaviour, PubUnderscoreFieldsBehaviour, Rename, ErrorMessageCaseBehavior};
 use crate::ClippyConfiguration;
 use rustc_data_structures::fx::FxHashSet;
 use rustc_session::Session;
@@ -552,6 +552,9 @@ define_Conf! {
     /// Lint "public" fields in a struct that are prefixed with an underscore based on their
     /// exported visibility, or whether they are marked as "pub".
     (pub_underscore_fields_behavior: PubUnderscoreFieldsBehaviour = PubUnderscoreFieldsBehaviour::PublicallyExported),
+    /// Lint: ERROR_MESSAGE_CASE
+    ///
+    /// todo this message
     (error_message_case_behavior: ErrorMessageCaseBehavior = ErrorMessageCaseBehavior::Lower),
 }
 

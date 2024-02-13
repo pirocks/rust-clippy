@@ -1,17 +1,10 @@
 use std::collections::HashMap;
 use clippy_config::types::ErrorMessageCaseBehavior;
 use clippy_utils::{get_parent_as_impl, MaybePath};
-use rustc_data_structures::fx::FxHashMap;
 use rustc_hir::*;
-use rustc_hir::intravisit::FnKind;
 use rustc_lint::{LateContext, LateLintPass};
-use rustc_middle::mir::traversal::Postorder;
-use rustc_session::{declare_lint_pass, impl_lint_pass};
-use rustc_span::def_id::LocalDefId;
-use rustc_span::{Span, sym, Symbol};
-use rustc_target::asm::X86InlineAsmReg::bl;
-
-declare_clippy_lint! {
+use rustc_session::impl_lint_pass;
+use rustc_span::{sym, Symbol};declare_clippy_lint! {
     /// ### What it does
     ///
     /// ### Why is this bad?
@@ -63,12 +56,12 @@ impl PrintBehavior {
 #[derive(Copy, Clone)]
 pub struct ExpressionId(HirId);
 
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub struct ErrorMessageCase {
-    error_message_case_behavior: ErrorMessageCaseBehavior,
-    inner: HashMap<ExpressionId, PrintBehavior>,
+    pub(crate) error_message_case_behavior: ErrorMessageCaseBehavior,
+    pub(crate) inner: HashMap<ExpressionId, PrintBehavior>,
     // Whether we are inside Display or Debug trait impl - None for neither
-    format_trait_impl: Option<FormatTraitNames>,
+    pub(crate) format_trait_impl: Option<FormatTraitNames>,
 }
 
 impl ErrorMessageCase {
@@ -90,26 +83,26 @@ struct FormatTraitNames {
     formatter_name: Option<Symbol>,
 }
 
-fn expr_print_behavior_many(arrays: &'_ [impl AsRef<Expr<'_>>]) -> PrintBehavior {
-    arrays.iter().fold(PrintBehavior::NoPrint, |acc, expr| {
-        acc.combine(expr_print_behavior(expr))
+fn expr_print_behavior_many<'a>(cx: &LateContext<'_>,format_trait_names: &FormatTraitNames, arrays: impl IntoIterator<Item=&'a Expr<'a>>) -> PrintBehavior {
+    arrays.into_iter().fold(PrintBehavior::NoPrint, |acc, expr| {
+        acc.combine(expr_print_behavior(cx, expr))
     })
 }
 
-fn stmt_print_behvaior_many(arrays: &'_ [impl AsRef<Stmt<'_>>]) -> PrintBehavior {
+fn stmt_print_behvaior_many<'a>(cx: &LateContext<'_>,format_trait_names: &FormatTraitNames, arrays: &'_ [Stmt<'a>]) -> PrintBehavior {
     arrays.iter().fold(PrintBehavior::NoPrint, |acc, stmt| {
-        acc.combine(stmt_print_behavior(stmt))
+        acc.combine(stmt_print_behavior(cx, stmt))
     })
 }
 
-fn stmt_print_behavior(stmt: &'_ Stmt<'_>) -> PrintBehavior {
+fn stmt_print_behavior(cx: &LateContext<'_>,format_trait_names: &FormatTraitNames, stmt: &'_ Stmt<'_>) -> PrintBehavior {
     match stmt.kind{
         StmtKind::Local(local) => {
             if let Some(expr) = local.init {
                 let else_block  = local.els.map(|else_block|{
-                    stmt_print_behvaior_many(else_block.stmts)
+                    stmt_print_behvaior_many(cx, else_block.stmts)
                 }).unwrap_or(PrintBehavior::NoPrint);
-                expr_print_behavior(expr).combine(else_block)
+                expr_print_behavior(cx, expr).combine(else_block)
             } else {
                 PrintBehavior::NoPrint
             }
@@ -119,21 +112,21 @@ fn stmt_print_behavior(stmt: &'_ Stmt<'_>) -> PrintBehavior {
         }
         StmtKind::Expr(expr) |
         StmtKind::Semi(expr) => {
-            expr_print_behavior(&expr)
+            expr_print_behavior(cx, &expr)
         }
     }
 }
 
-fn block_print_behavior(block: &'_ Block<'_>) -> PrintBehavior {
+fn block_print_behavior(cx: &LateContext<'_>,format_trait_names: &FormatTraitNames, block: &'_ Block<'_>) -> PrintBehavior {
     if let Some(expr) = block.expr {
-        stmt_print_behvaior_many(block.stmts).combine(expr_print_behavior(&expr))
+        stmt_print_behvaior_many(cx, &block.stmts).combine(expr_print_behavior(cx, &expr))
     } else {
-        stmt_print_behvaior_many(block.stmts)
+        stmt_print_behvaior_many(cx, &block.stmts)
     }
 
 }
 
-fn expr_print_behavior(expr: &'_ Expr<'_>) -> PrintBehavior {
+fn expr_print_behavior(cx: &LateContext<'_>, format_trait_names: &FormatTraitNames, expr: &'_ Expr<'_>) -> PrintBehavior {
     match expr.kind {
         ExprKind::Err(_) |
         ExprKind::OffsetOf(_, _) |
@@ -147,13 +140,13 @@ fn expr_print_behavior(expr: &'_ Expr<'_>) -> PrintBehavior {
         }
         ExprKind::Tup(elems) |
         ExprKind::Array(elems) => {
-            expr_print_behavior_many(elems)
+            expr_print_behavior_many(cx, elems)
         }
         ExprKind::Index(left, right, _) |
         ExprKind::AssignOp(_, left, right) |
         ExprKind::Assign(left, right, _) |
         ExprKind::Binary(_, left, right) => {
-            expr_print_behavior(left).combine(expr_print_behavior(right))
+            expr_print_behavior(cx, left).combine(expr_print_behavior(cx, right))
         }
         ExprKind::Yield(inner, _) |
         ExprKind::Repeat(inner, _) |
@@ -165,42 +158,51 @@ fn expr_print_behavior(expr: &'_ Expr<'_>) -> PrintBehavior {
         ExprKind::Cast(inner, _) |
         ExprKind::Type(inner, _) |
         ExprKind::DropTemps(inner) => {
-            expr_print_behavior(inner)
+            expr_print_behavior(cx, inner)
         }
         ExprKind::Let(let_) => {
-            expr_print_behavior(&let_.init)
+            expr_print_behavior(cx, &let_.init)
         }
         ExprKind::If(condition, if_case, else_case) => {
             if let Some(else_case) = else_case {
-                expr_print_behavior_many(&[condition,if_case, else_case])
+                expr_print_behavior_many(cx, [condition,if_case, else_case])
             } else {
-                expr_print_behavior_many(&[condition,if_case])
+                expr_print_behavior_many(cx, [condition,if_case])
             }
         }
         ExprKind::Loop(block, _, _, _) |
         ExprKind::Block(block, _) => {
-            block_print_behavior(block)
+            block_print_behavior(cx, block)
         }
         ExprKind::Break(_, inner_option) |
         ExprKind::Ret(inner_option) => {
-            inner_option.map_or(PrintBehavior::NoPrint, expr_print_behavior)
+            inner_option
+                .map(|expr|expr_print_behavior(cx, expr))
+                .unwrap_or(PrintBehavior::NoPrint)
         }
         ExprKind::Struct(_, fields, base) => {
             fields.iter().map(|field|field.expr).chain(base).fold(PrintBehavior::NoPrint, |acc, expr| {
-                acc.combine(expr_print_behavior(expr))
+                acc.combine(expr_print_behavior(cx, expr))
             })
         }
         ExprKind::Call(function_expr, args) => {
-            let function_print_behavior = expr_print_behavior(function_expr);
-            let args_print_behavior = expr_print_behavior_many(args);
+            let function_print_behavior = expr_print_behavior(cx, function_expr);
+            let args_print_behavior = expr_print_behavior_many(cx, args);
             let qpath = function_expr.qpath_opt();
             if let ExprKind::Path(QPath::Resolved(_, path)) = &function_expr.kind
                 && let Some(def_id) = path.res.opt_def_id() {
+                if cx.get_def_path(def_id) == &[sym::core, sym::option, sym::Write, sym::write] {
+                    return args_print_behavior;
+
+                }
+                format_trait_names.formatter_name
                 todo!()
             }
 
         }
-        ExprKind::MethodCall(_, _, _, _) => {}
+        ExprKind::MethodCall(_, _, _, _) => {
+
+        }
     }
 }
 

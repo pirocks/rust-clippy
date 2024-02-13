@@ -366,10 +366,10 @@ mod wildcard_imports;
 mod write;
 mod zero_div_zero;
 mod zero_sized_map_values;
-mod library_crates_error_enum;
 // end lints modules, do not remove this comment, it’s used in `update_lints`
 
 use clippy_config::{get_configuration_metadata, Conf};
+use clippy_config::types::ErrorMessageCaseBehavior;
 
 /// Register all pre expansion lints
 ///
@@ -580,6 +580,7 @@ pub fn register_lints(store: &mut rustc_lint::LintStore, conf: &'static Conf) {
 
         blacklisted_names: _,
         cyclomatic_complexity_threshold: _,
+        error_message_case_behavior,
     } = *conf;
     let msrv = || msrv.clone();
 
@@ -1097,7 +1098,11 @@ pub fn register_lints(store: &mut rustc_lint::LintStore, conf: &'static Conf) {
     });
     store
         .register_late_pass(move |_| Box::<library_crates_structured_errors::LibraryCratesStructuredErrors>::default());
-    store.register_late_pass(|_| Box::new(error_message_case::ErrorMessageCase));
+    store.register_late_pass(|_| Box::new(error_message_case::ErrorMessageCase {
+        error_message_case_behavior,
+        inner: Default::default(),
+        format_trait_impl: None,
+    }));
     // add lints here, do not remove this comment, it's used in `new_lint`
 }
 
