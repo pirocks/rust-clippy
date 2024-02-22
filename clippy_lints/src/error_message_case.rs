@@ -190,8 +190,11 @@ fn expr_print_behavior(cx: &LateContext<'_>, format_trait_names: &FormatTraitNam
             let args_print_behavior = expr_print_behavior_many(cx, args);
             let qpath = function_expr.qpath_opt();
             if let ExprKind::Path(QPath::Resolved(_, path)) = &function_expr.kind
-                && let Some(def_id) = path.res.opt_def_id() {
-                if cx.get_def_path(def_id) == &[sym::core, sym::option, sym::Write, sym::write] {
+                && let Some(def_id) = path.res.opt_def_id()
+                && let def_path = cx.get_def_path(def_id)
+                && let def_path = def_path.iter().map(Symbol::as_str).collect::<Vec<_>>()
+            {
+                if def_path == &[sym::core, sym::option, sym::Write, sym::write] {
                     return args_print_behavior;
 
                 }
@@ -200,8 +203,20 @@ fn expr_print_behavior(cx: &LateContext<'_>, format_trait_names: &FormatTraitNam
             }
 
         }
-        ExprKind::MethodCall(_, _, _, _) => {
-
+        ExprKind::MethodCall(method_path, arg, args, span) => {
+            //todo do something with span
+            let arg_print_behavior = expr_print_behavior(cx, format_trait_names,arg);
+            let args_print_behavior = expr_print_behavior_many(cx,format_trait_names, args);
+            if let PrintBehavior::NoPrint = arg_print_behavior.combine(args_print_behavior){
+                if let Some(def_id) = method_path.res.opt_def_id(){
+                    let def_path = cx.get_def_path(def_id);
+                    let def_path = def_path.iter().map(Symbol::as_str).collect::<Vec<_>>();
+                    if def_path == &["core", "fmt", "Write", "write"] {
+                        args[0]
+                        return PrintBehavior::StartsWithLowercase;
+                    }
+                }
+            }
         }
     }
 }
