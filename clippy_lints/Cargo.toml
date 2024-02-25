@@ -30,92 +30,92 @@ semver = "1.0"
 rustc-semver = "1.1"
 url = "2.2"
 
-[dependencies.rustc_lint]
-path = "/home/francis/CLionProjects/rust/compiler/rustc_lint"
-optional = true
-
-[dependencies.rustc_abi]
-path = "/home/francis/CLionProjects/rust/compiler/rustc_abi"
-optional = true
-
-[dependencies.rustc_session]
-path = "/home/francis/CLionProjects/rust/compiler/rustc_session"
-optional = true
-
-[dependencies.rustc_hir_analysis]
-path = "/home/francis/CLionProjects/rust/compiler/rustc_hir_analysis"
-optional = true
-
-[dependencies.rustc_data_structures]
-path = "/home/francis/CLionProjects/rust/compiler/rustc_data_structures"
+[dependencies.rustc_target]
+path = "/home/francis/rust/compiler/rustc_target"
 optional = true
 
 [dependencies.rustc_hir]
-path = "/home/francis/CLionProjects/rust/compiler/rustc_hir"
-optional = true
-
-[dependencies.rustc_arena]
-path = "/home/francis/CLionProjects/rust/compiler/rustc_arena"
-optional = true
-
-[dependencies.rustc_ast]
-path = "/home/francis/CLionProjects/rust/compiler/rustc_ast"
+path = "/home/francis/rust/compiler/rustc_hir"
 optional = true
 
 [dependencies.rustc_errors]
-path = "/home/francis/CLionProjects/rust/compiler/rustc_errors"
-optional = true
-
-[dependencies.rustc_index]
-path = "/home/francis/CLionProjects/rust/compiler/rustc_index"
-optional = true
-
-[dependencies.rustc_middle]
-path = "/home/francis/CLionProjects/rust/compiler/rustc_middle"
-optional = true
-
-[dependencies.rustc_target]
-path = "/home/francis/CLionProjects/rust/compiler/rustc_target"
-optional = true
-
-[dependencies.rustc_driver]
-path = "/home/francis/CLionProjects/rust/compiler/rustc_driver"
-optional = true
-
-[dependencies.rustc_parse]
-path = "/home/francis/CLionProjects/rust/compiler/rustc_parse"
-optional = true
-
-[dependencies.rustc_hir_pretty]
-path = "/home/francis/CLionProjects/rust/compiler/rustc_hir_pretty"
-optional = true
-
-[dependencies.rustc_infer]
-path = "/home/francis/CLionProjects/rust/compiler/rustc_infer"
-optional = true
-
-[dependencies.rustc_lexer]
-path = "/home/francis/CLionProjects/rust/compiler/rustc_lexer"
-optional = true
-
-[dependencies.rustc_resolve]
-path = "/home/francis/CLionProjects/rust/compiler/rustc_resolve"
-optional = true
-
-[dependencies.rustc_span]
-path = "/home/francis/CLionProjects/rust/compiler/rustc_span"
+path = "/home/francis/rust/compiler/rustc_errors"
 optional = true
 
 [dependencies.rustc_ast_pretty]
-path = "/home/francis/CLionProjects/rust/compiler/rustc_ast_pretty"
+path = "/home/francis/rust/compiler/rustc_ast_pretty"
+optional = true
+
+[dependencies.rustc_abi]
+path = "/home/francis/rust/compiler/rustc_abi"
+optional = true
+
+[dependencies.rustc_hir_pretty]
+path = "/home/francis/rust/compiler/rustc_hir_pretty"
+optional = true
+
+[dependencies.rustc_index]
+path = "/home/francis/rust/compiler/rustc_index"
 optional = true
 
 [dependencies.rustc_hir_typeck]
-path = "/home/francis/CLionProjects/rust/compiler/rustc_hir_typeck"
+path = "/home/francis/rust/compiler/rustc_hir_typeck"
+optional = true
+
+[dependencies.rustc_lint]
+path = "/home/francis/rust/compiler/rustc_lint"
+optional = true
+
+[dependencies.rustc_resolve]
+path = "/home/francis/rust/compiler/rustc_resolve"
+optional = true
+
+[dependencies.rustc_ast]
+path = "/home/francis/rust/compiler/rustc_ast"
+optional = true
+
+[dependencies.rustc_infer]
+path = "/home/francis/rust/compiler/rustc_infer"
+optional = true
+
+[dependencies.rustc_data_structures]
+path = "/home/francis/rust/compiler/rustc_data_structures"
 optional = true
 
 [dependencies.rustc_trait_selection]
-path = "/home/francis/CLionProjects/rust/compiler/rustc_trait_selection"
+path = "/home/francis/rust/compiler/rustc_trait_selection"
+optional = true
+
+[dependencies.rustc_session]
+path = "/home/francis/rust/compiler/rustc_session"
+optional = true
+
+[dependencies.rustc_span]
+path = "/home/francis/rust/compiler/rustc_span"
+optional = true
+
+[dependencies.rustc_driver]
+path = "/home/francis/rust/compiler/rustc_driver"
+optional = true
+
+[dependencies.rustc_lexer]
+path = "/home/francis/rust/compiler/rustc_lexer"
+optional = true
+
+[dependencies.rustc_parse]
+path = "/home/francis/rust/compiler/rustc_parse"
+optional = true
+
+[dependencies.rustc_middle]
+path = "/home/francis/rust/compiler/rustc_middle"
+optional = true
+
+[dependencies.rustc_hir_analysis]
+path = "/home/francis/rust/compiler/rustc_hir_analysis"
+optional = true
+
+[dependencies.rustc_arena]
+path = "/home/francis/rust/compiler/rustc_arena"
 optional = true
 
 [dev-dependencies]
@@ -125,7 +125,7 @@ walkdir = "2.3"
 deny-warnings = ["clippy_config/deny-warnings", "clippy_utils/deny-warnings"]
 # build clippy with internal lints enabled, off by default
 internal = ["serde_json", "tempfile", "regex"]
-intellij = ["rustc_lint", "rustc_abi", "rustc_session", "rustc_hir_analysis", "rustc_data_structures", "rustc_hir", "rustc_arena", "rustc_ast", "rustc_errors", "rustc_index", "rustc_middle", "rustc_target", "rustc_driver", "rustc_parse", "rustc_hir_pretty", "rustc_infer", "rustc_lexer", "rustc_resolve", "rustc_span", "rustc_ast_pretty", "rustc_hir_typeck", "rustc_trait_selection", "clippy_utils/intellij"]
+intellij = ["rustc_target", "rustc_hir", "rustc_errors", "rustc_ast_pretty", "rustc_abi", "rustc_hir_pretty", "rustc_index", "rustc_hir_typeck", "rustc_lint", "rustc_resolve", "rustc_ast", "rustc_infer", "rustc_data_structures", "rustc_trait_selection", "rustc_session", "rustc_span", "rustc_driver", "rustc_lexer", "rustc_parse", "rustc_middle", "rustc_hir_analysis", "rustc_arena", "clippy_utils/intellij"]
 
 [package.metadata.rust-analyzer]
 # This crate uses #[feature(rustc_private)]
