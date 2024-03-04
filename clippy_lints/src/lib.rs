@@ -1098,11 +1098,7 @@ pub fn register_lints(store: &mut rustc_lint::LintStore, conf: &'static Conf) {
     });
     store
         .register_late_pass(move |_| Box::<library_crates_structured_errors::LibraryCratesStructuredErrors>::default());
-    store.register_late_pass(|_| Box::new(error_message_case::ErrorMessageCase {
-        error_message_case_behavior,
-        inner: Default::default(),
-        format_trait_impl: None,
-    }));
+    store.register_late_pass(move |_| Box::new(error_message_case::ErrorMessageCase::new(error_message_case_behavior)));
     // add lints here, do not remove this comment, it's used in `new_lint`
 }
 

@@ -34,6 +34,7 @@ error: error reading Clippy's configuration file: unknown field `foobar`, expect
            enforced-import-renames
            enum-variant-name-threshold
            enum-variant-size-threshold
+           error-message-case-behavior
            excessive-nesting-threshold
            future-size-threshold
            ignore-interior-mutability
@@ -110,6 +111,7 @@ error: error reading Clippy's configuration file: unknown field `barfoo`, expect
            enforced-import-renames
            enum-variant-name-threshold
            enum-variant-size-threshold
+           error-message-case-behavior
            excessive-nesting-threshold
            future-size-threshold
            ignore-interior-mutability
