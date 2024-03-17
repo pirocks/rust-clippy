@@ -29,20 +29,20 @@ termize = "0.1"
 color-print = "0.3.4"
 anstream = "0.5.0"
 
-[dependencies.rustc_driver]
-path = "/home/francis/rust/compiler/rustc_driver"
+[dependencies.rustc_session]
+path = "/home/francis/CLionProjects/rust/compiler/rustc_session"
 optional = true
 
 [dependencies.rustc_span]
-path = "/home/francis/rust/compiler/rustc_span"
+path = "/home/francis/CLionProjects/rust/compiler/rustc_span"
+optional = true
+
+[dependencies.rustc_driver]
+path = "/home/francis/CLionProjects/rust/compiler/rustc_driver"
 optional = true
 
 [dependencies.rustc_interface]
-path = "/home/francis/rust/compiler/rustc_interface"
-optional = true
-
-[dependencies.rustc_session]
-path = "/home/francis/rust/compiler/rustc_session"
+path = "/home/francis/CLionProjects/rust/compiler/rustc_interface"
 optional = true
 
 [dev-dependencies]
@@ -72,7 +72,7 @@ rustc_tools_util = "0.3.0"
 deny-warnings = ["clippy_lints/deny-warnings"]
 integration = ["tempfile"]
 internal = ["clippy_lints/internal", "tempfile"]
-intellij = ["rustc_driver", "rustc_span", "rustc_interface", "rustc_session", "clippy_lints/intellij"]
+intellij = ["rustc_session", "rustc_span", "rustc_driver", "rustc_interface", "clippy_lints/intellij"]
 
 [package.metadata.rust-analyzer]
 # This package uses #[feature(rustc_private)]

@@ -10,85 +10,85 @@ arrayvec = { version = "0.7", default-features = false }
 itertools = "0.11"
 rustc-semver = "1.1"
 
-[dependencies.rustc_span]
-path = "/home/francis/rust/compiler/rustc_span"
-optional = true
-
-[dependencies.rustc_const_eval]
-path = "/home/francis/rust/compiler/rustc_const_eval"
-optional = true
-
-[dependencies.rustc_errors]
-path = "/home/francis/rust/compiler/rustc_errors"
-optional = true
-
-[dependencies.rustc_target]
-path = "/home/francis/rust/compiler/rustc_target"
-optional = true
-
-[dependencies.rustc_driver]
-path = "/home/francis/rust/compiler/rustc_driver"
+[dependencies.rustc_hir_typeck]
+path = "/home/francis/CLionProjects/rust/compiler/rustc_hir_typeck"
 optional = true
 
 [dependencies.rustc_middle]
-path = "/home/francis/rust/compiler/rustc_middle"
-optional = true
-
-[dependencies.rustc_data_structures]
-path = "/home/francis/rust/compiler/rustc_data_structures"
+path = "/home/francis/CLionProjects/rust/compiler/rustc_middle"
 optional = true
 
 [dependencies.rustc_lexer]
-path = "/home/francis/rust/compiler/rustc_lexer"
+path = "/home/francis/CLionProjects/rust/compiler/rustc_lexer"
 optional = true
 
-[dependencies.rustc_index]
-path = "/home/francis/rust/compiler/rustc_index"
-optional = true
-
-[dependencies.rustc_ast_pretty]
-path = "/home/francis/rust/compiler/rustc_ast_pretty"
-optional = true
-
-[dependencies.rustc_lint]
-path = "/home/francis/rust/compiler/rustc_lint"
-optional = true
-
-[dependencies.rustc_ast]
-path = "/home/francis/rust/compiler/rustc_ast"
+[dependencies.rustc_const_eval]
+path = "/home/francis/CLionProjects/rust/compiler/rustc_const_eval"
 optional = true
 
 [dependencies.rustc_infer]
-path = "/home/francis/rust/compiler/rustc_infer"
+path = "/home/francis/CLionProjects/rust/compiler/rustc_infer"
 optional = true
 
-[dependencies.rustc_attr]
-path = "/home/francis/rust/compiler/rustc_attr"
-optional = true
-
-[dependencies.rustc_session]
-path = "/home/francis/rust/compiler/rustc_session"
-optional = true
-
-[dependencies.rustc_trait_selection]
-path = "/home/francis/rust/compiler/rustc_trait_selection"
-optional = true
-
-[dependencies.rustc_hir_typeck]
-path = "/home/francis/rust/compiler/rustc_hir_typeck"
+[dependencies.rustc_lint]
+path = "/home/francis/CLionProjects/rust/compiler/rustc_lint"
 optional = true
 
 [dependencies.rustc_hir]
-path = "/home/francis/rust/compiler/rustc_hir"
+path = "/home/francis/CLionProjects/rust/compiler/rustc_hir"
+optional = true
+
+[dependencies.rustc_index]
+path = "/home/francis/CLionProjects/rust/compiler/rustc_index"
+optional = true
+
+[dependencies.rustc_attr]
+path = "/home/francis/CLionProjects/rust/compiler/rustc_attr"
+optional = true
+
+[dependencies.rustc_trait_selection]
+path = "/home/francis/CLionProjects/rust/compiler/rustc_trait_selection"
+optional = true
+
+[dependencies.rustc_session]
+path = "/home/francis/CLionProjects/rust/compiler/rustc_session"
+optional = true
+
+[dependencies.rustc_target]
+path = "/home/francis/CLionProjects/rust/compiler/rustc_target"
+optional = true
+
+[dependencies.rustc_ast]
+path = "/home/francis/CLionProjects/rust/compiler/rustc_ast"
+optional = true
+
+[dependencies.rustc_ast_pretty]
+path = "/home/francis/CLionProjects/rust/compiler/rustc_ast_pretty"
+optional = true
+
+[dependencies.rustc_driver]
+path = "/home/francis/CLionProjects/rust/compiler/rustc_driver"
+optional = true
+
+[dependencies.rustc_errors]
+path = "/home/francis/CLionProjects/rust/compiler/rustc_errors"
+optional = true
+
+[dependencies.rustc_data_structures]
+path = "/home/francis/CLionProjects/rust/compiler/rustc_data_structures"
 optional = true
 
 [dependencies.rustc_mir_dataflow]
-path = "/home/francis/rust/compiler/rustc_mir_dataflow"
+path = "/home/francis/CLionProjects/rust/compiler/rustc_mir_dataflow"
+optional = true
+
+[dependencies.rustc_span]
+path = "/home/francis/CLionProjects/rust/compiler/rustc_span"
 optional = true
 
 [features]
 deny-warnings = ["clippy_config/deny-warnings"]
-intellij = ["rustc_span", "rustc_const_eval", "rustc_errors", "rustc_target", "rustc_driver", "rustc_middle", "rustc_data_structures", "rustc_lexer", "rustc_index", "rustc_ast_pretty", "rustc_lint", "rustc_ast", "rustc_infer", "rustc_attr", "rustc_session", "rustc_trait_selection", "rustc_hir_typeck", "rustc_hir", "rustc_mir_dataflow"]
+intellij = ["rustc_hir_typeck", "rustc_middle", "rustc_lexer", "rustc_const_eval", "rustc_infer", "rustc_lint", "rustc_hir", "rustc_index", "rustc_attr", "rustc_trait_selection", "rustc_session", "rustc_target", "rustc_ast", "rustc_ast_pretty", "rustc_driver", "rustc_errors", "rustc_data_structures", "rustc_mir_dataflow", "rustc_span"]
 
 [package.metadata.rust-analyzer]
 # This crate uses #[feature(rustc_private)]

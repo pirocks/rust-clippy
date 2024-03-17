@@ -222,8 +222,6 @@ fn expr_print_behavior(cx: &LateContext<'_>, format_trait_names: &FormatTraitNam
                             dbg!(args[0]);
                             return todo!();
                         }
-                    }else {
-                        todo!()
                     }
                 }
                 ExprKind::Path(QPath::LangItem(lang_item,_)) => {
